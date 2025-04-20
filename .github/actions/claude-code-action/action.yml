@@ -82,7 +82,10 @@ runs:
         else
           mkdir -p /tmp/claude-action
           PROMPT_PATH="/tmp/claude-action/prompt.txt"
-          echo "${{ inputs.prompt }}" > "$PROMPT_PATH"
+          # Write the prompt to a file using a heredoc to preserve formatting
+          cat << 'EOL' > "$PROMPT_PATH"
+${{ inputs.prompt }}
+EOL
         fi
 
         # Verify the prompt file is not empty
@@ -115,7 +118,7 @@ runs:
           -p \
           --verbose \
           --output-format stream-json \
-          "$(cat ${{ env.PROMPT_PATH }})" \
+          --prompt-file "${{ env.PROMPT_PATH }}" \
           ${{ inputs.allowed_tools != '' && format('--allowedTools "{0}"', inputs.allowed_tools) || '' }} | tee output.txt
 
         # Process output.txt into JSON
