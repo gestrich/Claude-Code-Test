@@ -58,6 +58,6 @@ jobs:
             * Authentication/authorization controls
             * Data protection concerns
 
-            IMPORTANT: Your response MUST strictly follow this format with numbered section headers and bulleted lists. Do not include any content outside these sections. Do not add additional sections or prefaces. Start directly with "## 1. Description of Changes" and end with the last item in the security section.
+            IMPORTANT: This output will be placed directly into a GitHub pull request comment. Your response MUST strictly follow this format with numbered section headers and bulleted lists. DO NOT include any reasoning, explanations of your process, or any text outside these defined sections. DO NOT include phrases like "Here's my analysis" or "Based on the code changes". Start your response directly with "## 1. Description of Changes" and end with the last item in the security section. Provide ONLY the final markdown output.
           allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
           timeout_minutes: "15"
