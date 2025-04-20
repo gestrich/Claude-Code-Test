@@ -84,11 +84,6 @@ runs:
       shell: bash
       id: run_claude
       run: |
-        ALLOWED_TOOLS_ARG=""
-        if [ ! -z "${{ inputs.allowed_tools }}" ]; then
-          ALLOWED_TOOLS_ARG="--allowedTools ${{ inputs.allowed_tools }}"
-        fi
-
         # Set a timeout to ensure the command doesn't run indefinitely
         timeout_seconds=$((${{ inputs.timeout_minutes }} * 60))
 
@@ -98,10 +93,9 @@ runs:
         
         # Run Claude Code and capture output
         timeout $timeout_seconds claude \
-          -p \
+          -p "${{ env.PROMPT_PATH }}" \
           --verbose \
           --output-format stream-json \
-          --prompt-file "${{ env.PROMPT_PATH }}" \
           ${{ inputs.allowed_tools != '' && format('--allowedTools "{0}"', inputs.allowed_tools) || '' }} | tee output.txt
 
         # Process output.txt into JSON
