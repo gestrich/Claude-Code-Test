@@ -23,34 +23,41 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Review the code changes in this PR and provide a comprehensive analysis:
+            Review the code changes in this PR and provide a comprehensive analysis. Format your response using the following structure with clear markdown section headers and bulleted lists within each section:
 
-            ## Pull Request Summary
-            Provide a high-level description of the changes in this PR, including:
-            - The main features or fixes being implemented
-            - Technical approach used
-            - Overall impact on the codebase
+            ## 1. Description of Changes
+            Provide a high-level summary of the PR changes. Include:
+            * Main features or fixes being implemented
+            * Technical approach used
+            * Overall impact on the codebase
 
-            ## Potential Risks
-            Identify any potential risks in the code changes, including:
-            - Possible edge cases that might not be handled
-            - Performance concerns
-            - Compatibility issues
-            - Regression risks
+            ## 2. Potential Risks
+            Identify any potential risks in these changes:
+            * Possible edge cases that might not be handled
+            * Performance concerns
+            * Compatibility issues
+            * Regression risks
 
-            ## Code Review
-            1. Bugs and Issues:
-               - Point out any potential bugs or logical errors
-               - Identify any missing validations or error handling
+            ## 3. Issues and Bugs
+            Highlight any problems found in the code:
+            * Potential bugs or logical errors
+            * Missing validations or error handling
+            * Edge cases not accounted for
 
-            2. Best Practices Suggestions:
-               - Suggest improvements for code organization and structure
-               - Point out where patterns could be more consistent with the codebase
-               - Identify opportunities to improve readability and maintainability
+            ## 4. Best Practices Suggestions
+            Provide recommendations for improvement:
+            * Code organization and structure improvements
+            * Consistency with existing patterns in the codebase
+            * Opportunities to improve readability and maintainability
+            * Performance optimizations
 
-            3. Security Vulnerabilities:
-               - Check for any security issues like input validation problems
-               - Identify potential injection vulnerabilities
-               - Check for proper authentication/authorization controls
+            ## 5. Security Considerations
+            Identify any security concerns:
+            * Input validation issues
+            * Potential injection vulnerabilities
+            * Authentication/authorization controls
+            * Data protection concerns
+
+            Remember to format your output with clear section headers (using markdown ## format with section numbers) and use bullet points (*) for all items within each section.
           allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
           timeout_minutes: "15"
