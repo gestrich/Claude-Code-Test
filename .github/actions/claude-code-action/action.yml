@@ -55,7 +55,7 @@ runs:
             "ghcr.io/github/github-mcp-server:sha-ff3036d"
           ],
           "env": {
-            "GITHUB_PERSONAL_ACCESS_TOKEN": "${{ inputs.GITHUB_TOKEN }}"
+            "GITHUB_PERSONAL_ACCESS_TOKEN": "${{ inputs.github_token }}"
           }
         }'
 
@@ -63,37 +63,53 @@ runs:
       shell: bash
       id: prepare_prompt
       run: |
+        # Create a script to handle the prompt preparation
+        mkdir -p /tmp/claude-action
+        cat > /tmp/claude-action/prepare-prompt.sh << 'SCRIPT'
+        #!/bin/bash
+        set -e
+        
+        PROMPT="${1}"
+        PROMPT_FILE="${2}"
+        
         # Check if either prompt or prompt_file is provided
-        if [ -z "${{ inputs.prompt }}" ] && [ -z "${{ inputs.prompt_file }}" ]; then
+        if [ -z "$PROMPT" ] && [ -z "$PROMPT_FILE" ]; then
           echo "::error::Neither 'prompt' nor 'prompt_file' was provided. At least one is required."
           exit 1
         fi
-
+        
         # Determine which prompt source to use
-        if [ ! -z "${{ inputs.prompt_file }}" ]; then
+        if [ ! -z "$PROMPT_FILE" ]; then
           # Check if the prompt file exists
-          if [ ! -f "${{ inputs.prompt_file }}" ]; then
-            echo "::error::Prompt file '${{ inputs.prompt_file }}' does not exist."
+          if [ ! -f "$PROMPT_FILE" ]; then
+            echo "::error::Prompt file '$PROMPT_FILE' does not exist."
             exit 1
           fi
-
+        
           # Use the provided prompt file
-          PROMPT_PATH="${{ inputs.prompt_file }}"
+          PROMPT_PATH="$PROMPT_FILE"
         else
           mkdir -p /tmp/claude-action
           PROMPT_PATH="/tmp/claude-action/prompt.txt"
-          # Write the prompt to a file using a heredoc to preserve formatting
-          cat << EOL > "$PROMPT_PATH"
-${{ inputs.prompt }}
-EOL
+          # Write the prompt to a file
+          echo "$PROMPT" > "$PROMPT_PATH"
         fi
-
+        
         # Verify the prompt file is not empty
         if [ ! -s "$PROMPT_PATH" ]; then
           echo "::error::Prompt is empty. Please provide a non-empty prompt."
           exit 1
         fi
-
+        
+        # Output the prompt path
+        echo "$PROMPT_PATH"
+        SCRIPT
+        
+        chmod +x /tmp/claude-action/prepare-prompt.sh
+        
+        # Run the script and capture the output
+        PROMPT_PATH=$(/tmp/claude-action/prepare-prompt.sh "${{ inputs.prompt }}" "${{ inputs.prompt_file }}")
+        
         # Save the prompt path for the next step
         echo "PROMPT_PATH=$PROMPT_PATH" >> $GITHUB_ENV
 
