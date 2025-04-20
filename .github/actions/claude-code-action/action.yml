@@ -83,7 +83,7 @@ runs:
           mkdir -p /tmp/claude-action
           PROMPT_PATH="/tmp/claude-action/prompt.txt"
           # Write the prompt to a file using a heredoc to preserve formatting
-          cat << 'EOL' > "$PROMPT_PATH"
+          cat << EOL > "$PROMPT_PATH"
 ${{ inputs.prompt }}
 EOL
         fi
