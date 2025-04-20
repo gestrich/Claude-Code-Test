@@ -1,0 +1,23 @@
+Perform a security audit on the code changes in this PR. Focus only on security implications and vulnerabilities. Format your response with these sections:
+
+## 1. Security Vulnerabilities
+* Identify any potential security weaknesses
+* Highlight areas susceptible to common attacks (XSS, CSRF, SQL injection, etc.)
+* Note any improper handling of sensitive data
+
+## 2. Authentication & Authorization
+* Review authentication mechanisms if modified
+* Check for proper authorization controls
+* Identify potential privilege escalation issues
+
+## 3. Data Validation
+* Assess input validation and sanitization
+* Check for potential injection vulnerabilities
+* Review output encoding practices
+
+## 4. Security Recommendations
+* Provide specific remediation steps with examples
+* Suggest security best practices to implement
+* Prioritize fixes based on severity
+
+IMPORTANT: This output will be placed directly into a GitHub pull request comment. Your response MUST strictly follow this format with the section headers and bulleted lists. Start your response directly with "## 1. Security Vulnerabilities" and provide ONLY the final markdown output.

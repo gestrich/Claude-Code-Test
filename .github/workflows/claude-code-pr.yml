@@ -35,105 +35,20 @@ jobs:
           PROMPT_OPTION="${{ github.event.inputs.prompt_option || 'PR Summary' }}"
           
           if [[ "$PROMPT_OPTION" == "PR Summary" ]]; then
-            cat << 'EOF' > /tmp/prompt.txt
-Review the code changes in this PR and provide a comprehensive analysis. Format your response using the following structure with clear markdown section headers and bulleted lists within each section:
-
-## 1. Description of Changes
-Provide a high-level summary of the PR changes. Include:
-* Main features or fixes being implemented
-* Technical approach used
-* Overall impact on the codebase
-
-## 2. Potential Risks
-Identify any potential risks in these changes:
-* Possible edge cases that might not be handled
-* Performance concerns
-* Compatibility issues
-* Regression risks
-
-## 3. Issues and Bugs
-Highlight any problems found in the code:
-* Potential bugs or logical errors
-* Missing validations or error handling
-* Edge cases not accounted for
-
-## 4. Best Practices Suggestions
-Provide recommendations for improvement:
-* Code organization and structure improvements
-* Consistency with existing patterns in the codebase
-* Opportunities to improve readability and maintainability
-* Performance optimizations
-
-## 5. Security Considerations
-Identify any security concerns:
-* Input validation issues
-* Potential injection vulnerabilities
-* Authentication/authorization controls
-* Data protection concerns
-
-IMPORTANT: This output will be placed directly into a GitHub pull request comment. Your response MUST strictly follow this format with numbered section headers and bulleted lists. DO NOT include any reasoning, explanations of your process, or any text outside these defined sections. DO NOT include phrases like "Here's my analysis" or "Based on the code changes". Start your response directly with "## 1. Description of Changes" and end with the last item in the security section. Provide ONLY the final markdown output.
-EOF
+            PROMPT_PATH=".github/prompts/pr-summary.txt"
           elif [[ "$PROMPT_OPTION" == "Code Review" ]]; then
-            cat << 'EOF' > /tmp/prompt.txt
-Review the code changes in this PR and provide detailed code review feedback. Focus on code quality, maintainability, and functionality. Format your response with these sections:
-
-## 1. Code Structure
-* Assess code organization and architecture
-* Evaluate component separation and responsibilities
-* Comment on naming conventions and readability
-
-## 2. Logic Review
-* Identify potential logical errors or edge cases
-* Assess algorithm efficiency and optimization
-* Review data flow and state management
-
-## 3. Testing Assessment
-* Evaluate test coverage and quality
-* Identify untested scenarios
-* Suggest additional test cases
-
-## 4. Recommendations
-* Provide specific code improvements with examples
-* Suggest refactoring opportunities
-* Highlight best practices that could be applied
-
-IMPORTANT: This output will be placed directly into a GitHub pull request comment. Your response MUST strictly follow this format with the section headers and bulleted lists. Start your response directly with "## 1. Code Structure" and provide ONLY the final markdown output.
-EOF
+            PROMPT_PATH=".github/prompts/code-review.txt"
           elif [[ "$PROMPT_OPTION" == "Security Audit" ]]; then
-            cat << 'EOF' > /tmp/prompt.txt
-Perform a security audit on the code changes in this PR. Focus only on security implications and vulnerabilities. Format your response with these sections:
-
-## 1. Security Vulnerabilities
-* Identify any potential security weaknesses
-* Highlight areas susceptible to common attacks (XSS, CSRF, SQL injection, etc.)
-* Note any improper handling of sensitive data
-
-## 2. Authentication & Authorization
-* Review authentication mechanisms if modified
-* Check for proper authorization controls
-* Identify potential privilege escalation issues
-
-## 3. Data Validation
-* Assess input validation and sanitization
-* Check for potential injection vulnerabilities
-* Review output encoding practices
-
-## 4. Security Recommendations
-* Provide specific remediation steps with examples
-* Suggest security best practices to implement
-* Prioritize fixes based on severity
-
-IMPORTANT: This output will be placed directly into a GitHub pull request comment. Your response MUST strictly follow this format with the section headers and bulleted lists. Start your response directly with "## 1. Security Vulnerabilities" and provide ONLY the final markdown output.
-EOF
+            PROMPT_PATH=".github/prompts/security-audit.txt"
           fi
           
-          echo "prompt_file=/tmp/prompt.txt" >> $GITHUB_OUTPUT
+          echo "prompt=Please read and follow the instructions in $PROMPT_PATH to review this PR." >> $GITHUB_OUTPUT
 
       - name: Run Claude Code Action
         uses: ./.github/actions/claude-code-action
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt_file: ${{ steps.set-prompt.outputs.prompt_file }}
+          prompt: ${{ steps.set-prompt.outputs.prompt }}
           allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
           timeout_minutes: "15"
