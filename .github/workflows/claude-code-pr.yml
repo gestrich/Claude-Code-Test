@@ -1,0 +1,30 @@
+name: Claude Code PR Workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - '**'
+
+jobs:
+  run-claude-code:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Code Action
+        uses: ./.github/actions/claude-code-action
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Review the code changes in this PR:
+            1. Point out any potential bugs or issues
+            2. Suggest improvements for code quality
+            3. Check for security vulnerabilities
+          allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
+          timeout_minutes: "15"
