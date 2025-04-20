@@ -1,0 +1,10 @@
+# Security Audit Prompt
+
+Please conduct a thorough security audit of this pull request, focusing on:
+
+1. Security vulnerabilities
+2. Authentication and authorization concerns
+3. Data validation and input handling
+4. Security best practices recommendations
+
+Identify any security risks with clear examples and suggest specific mitigations.

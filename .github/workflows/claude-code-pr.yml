@@ -1,0 +1,106 @@
+name: Claude Code PR Review
+
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-labels:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check-labels.outputs.should_run }}
+      prompt_file: ${{ steps.check-labels.outputs.prompt_file }}
+    steps:
+      - name: Check PR Labels
+        id: check-labels
+        run: |
+          PR_LABELS=$(jq -r '.pull_request.labels[].name // empty' "$GITHUB_EVENT_PATH")
+          echo "PR Labels: $PR_LABELS"
+          
+          SHOULD_RUN="false"
+          PROMPT_FILE=""
+          
+          # Check for any claude_* label
+          CLAUDE_LABEL=$(echo "$PR_LABELS" | grep -o "claude_[a-zA-Z0-9_-]*" | head -1)
+          
+          if [ -n "$CLAUDE_LABEL" ]; then
+            SHOULD_RUN="true"
+            PROMPT_FILE=".github/prompts/${CLAUDE_LABEL}.txt"
+            echo "Found Claude label: $CLAUDE_LABEL"
+          fi
+          
+          echo "should_run=$SHOULD_RUN" >> $GITHUB_OUTPUT
+          echo "prompt_file=$PROMPT_FILE" >> $GITHUB_OUTPUT
+
+  run-claude-code:
+    needs: check-labels
+    if: needs.check-labels.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      - name: Verify prompt file exists
+        run: |
+          PROMPT_FILE="${{ needs.check-labels.outputs.prompt_file }}"
+          if [ ! -f "$PROMPT_FILE" ]; then
+            echo "Prompt file '$PROMPT_FILE' does not exist. Creating a default one."
+            mkdir -p "$(dirname "$PROMPT_FILE")"
+            
+            # Extract label name from prompt file path
+            LABEL_NAME=$(basename "$PROMPT_FILE" .txt)
+            echo "Creating prompt file for label: $LABEL_NAME"
+            
+            echo "# Claude Code Review Prompt for $LABEL_NAME
+            
+            Please review this PR thoroughly, focusing on code quality, security, and best practices.
+            
+            Identify:
+            1. Bugs or errors
+            2. Security vulnerabilities
+            3. Performance issues
+            4. Code style inconsistencies
+            5. Possible improvements" > "$PROMPT_FILE"
+          fi
+      
+      - name: Run Claude Code Action
+        uses: ./.github/actions/claude-code-action
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt_file: ${{ needs.check-labels.outputs.prompt_file }}
+          allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
+          timeout_minutes: "15"
+          install_github_mcp: "true"
+          output_file: "claude-review-output.txt"
+          
+      - name: Process and Post Claude Review to PR
+        if: success()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+            
+            try {
+              console.log('Processing Claude output');
+              const reviewContent = execSync('bash .github/scripts/parse-claude-output.sh claude-review-output.txt', { encoding: 'utf8' }).trim();
+              
+              // Post the comment to the PR
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## Claude Code Review\n\n${reviewContent}`
+              });
+            } catch (error) {
+              console.error('Error processing Claude output:', error);
+              throw error;
+            }

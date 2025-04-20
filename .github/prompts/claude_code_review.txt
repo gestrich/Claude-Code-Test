@@ -1,0 +1,23 @@
+Review the code changes in this PR and provide detailed code review feedback. Focus on code quality, maintainability, and functionality. Format your response with these sections:
+
+## 1. Code Structure
+* Assess code organization and architecture
+* Evaluate component separation and responsibilities
+* Comment on naming conventions and readability
+
+## 2. Logic Review
+* Identify potential logical errors or edge cases
+* Assess algorithm efficiency and optimization
+* Review data flow and state management
+
+## 3. Testing Assessment
+* Evaluate test coverage and quality
+* Identify untested scenarios
+* Suggest additional test cases
+
+## 4. Recommendations
+* Provide specific code improvements with examples
+* Suggest refactoring opportunities
+* Highlight best practices that could be applied
+
+IMPORTANT: This output will be placed directly into a GitHub pull request comment. Your response MUST strictly follow this format with the section headers and bulleted lists. Start your response directly with "## 1. Code Structure" and provide ONLY the final markdown output.
