@@ -14,6 +14,10 @@ on:
           - 'PR Summary'
           - 'Code Review'
           - 'Security Audit'
+      branch:
+        description: 'Branch to run on'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -42,7 +46,15 @@ jobs:
             PROMPT_PATH=".github/prompts/security-audit.txt"
           fi
           
-          echo "prompt=Please read and follow the instructions in $PROMPT_PATH to review this PR." >> $GITHUB_OUTPUT
+          # Check if this is a workflow_dispatch event
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            # For manual runs without PR context, create output file
+            mkdir -p /tmp/claude-output
+            echo "OUTPUT_FILE=/tmp/claude-output/claude_response.md" >> $GITHUB_ENV
+            echo "output_file=/tmp/claude-output/claude_response.md" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "prompt=Please read and follow the instructions in $PROMPT_PATH to review this PR or the current branch if running manually." >> $GITHUB_OUTPUT
 
       - name: Run Claude Code Action
         uses: ./.github/actions/claude-code-action
@@ -50,5 +62,17 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: ${{ steps.set-prompt.outputs.prompt }}
+          output_file: ${{ steps.set-prompt.outputs.output_file }}
           allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
           timeout_minutes: "15"
+        
+      - name: Display Output for Manual Run
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [[ -f "${{ env.OUTPUT_FILE }}" ]]; then
+            echo "Claude Code Output:"
+            echo "===================="
+            cat "${{ env.OUTPUT_FILE }}"
+          else
+            echo "No output file was generated."
+          fi
