@@ -63,37 +63,13 @@ runs:
       shell: bash
       id: prepare_prompt
       run: |
-        # Simple approach to handle the prompt
         mkdir -p /tmp/claude-action
-        PROMPT_PATH=""
+        PROMPT_PATH="/tmp/claude-action/prompt.txt"
         
-        # Check if either prompt or prompt_file is provided
-        if [ -z "${{ inputs.prompt }}" ] && [ -z "${{ inputs.prompt_file }}" ]; then
-          echo "::error::Neither 'prompt' nor 'prompt_file' was provided. At least one is required."
-          exit 1
-        fi
-        
-        # Determine which prompt source to use
-        if [ ! -z "${{ inputs.prompt_file }}" ]; then
-          # Check if the prompt file exists
-          if [ ! -f "${{ inputs.prompt_file }}" ]; then
-            echo "::error::Prompt file '${{ inputs.prompt_file }}' does not exist."
-            exit 1
-          fi
-          
-          # Use the provided prompt file
-          PROMPT_PATH="${{ inputs.prompt_file }}"
-        else
-          # Create a prompt file
-          PROMPT_PATH="/tmp/claude-action/prompt.txt"
-          
-          # Write the prompt directly to a file
-          # This avoids heredoc issues
-          # We redirect each line separately to handle multi-line prompts
-          {
-            echo "${{ inputs.prompt }}"
-          } > "$PROMPT_PATH"
-        fi
+        # Write prompt to file using heredoc to preserve formatting
+        cat << 'EOF' > "$PROMPT_PATH"
+        ${{ inputs.prompt }}
+        EOF
         
         # Verify the prompt file is not empty
         if [ ! -s "$PROMPT_PATH" ]; then
