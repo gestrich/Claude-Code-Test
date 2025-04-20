@@ -58,6 +58,6 @@ jobs:
             * Authentication/authorization controls
             * Data protection concerns
 
-            Remember to format your output with clear section headers (using markdown ## format with section numbers) and use bullet points (*) for all items within each section.
+            IMPORTANT: Your response MUST strictly follow this format with numbered section headers and bulleted lists. Do not include any content outside these sections. Do not add additional sections or prefaces. Start directly with "## 1. Description of Changes" and end with the last item in the security section.
           allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
           timeout_minutes: "15"
