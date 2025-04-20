@@ -23,9 +23,34 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Review the code changes in this PR:
-            1. Point out any potential bugs or issues
-            2. Suggest improvements for code quality
-            3. Check for security vulnerabilities
+            Review the code changes in this PR and provide a comprehensive analysis:
+
+            ## Pull Request Summary
+            Provide a high-level description of the changes in this PR, including:
+            - The main features or fixes being implemented
+            - Technical approach used
+            - Overall impact on the codebase
+
+            ## Potential Risks
+            Identify any potential risks in the code changes, including:
+            - Possible edge cases that might not be handled
+            - Performance concerns
+            - Compatibility issues
+            - Regression risks
+
+            ## Code Review
+            1. Bugs and Issues:
+               - Point out any potential bugs or logical errors
+               - Identify any missing validations or error handling
+
+            2. Best Practices Suggestions:
+               - Suggest improvements for code organization and structure
+               - Point out where patterns could be more consistent with the codebase
+               - Identify opportunities to improve readability and maintainability
+
+            3. Security Vulnerabilities:
+               - Check for any security issues like input validation problems
+               - Identify potential injection vulnerabilities
+               - Check for proper authentication/authorization controls
           allowed_tools: "Bash,GlobTool,GrepTool,LS,View,Edit,Replace,ReadNotebook,WebFetchTool"
           timeout_minutes: "15"
